@@ -19,7 +19,8 @@ namespace Chonks.Depots {
 
         public bool TryWriteSave(string name, SaveChunk[] chunks, out Exception ex) {
             ex = null;
-            if (_chunks.TryAdd(name, chunks)) {
+            if (!_chunks.ContainsKey(name)) {
+                _chunks.Add(name, chunks);
                 _containers.Add(new SaveContainer() { Name = name, CreatedAt = DateTime.UtcNow, LastUpdatedAt = DateTime.UtcNow });
                 return true;
             } else {

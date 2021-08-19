@@ -18,7 +18,15 @@ namespace Chonks {
 
         public bool ContainsKey(string key) => _container.ContainsKey(key);
 
-        public bool TryAdd(string key, object value) => _container.TryAdd(key, value);
+        public bool TryAdd(string key, object value) {
+#if NETSTANDARD2_0
+            if (_container.ContainsKey(key)) return false;
+            _container.Add(key, value);
+            return true;
+#else
+            return _container.TryAdd(key, value);
+#endif
+        }
 
         public bool TryGetInt(string key, out int integer) {
             integer = -1;

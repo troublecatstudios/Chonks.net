@@ -54,7 +54,7 @@ namespace Chonks.Depots {
                 var readChunks = new List<SaveChunk>();
                 using (var fs = new FileStream(Path.Combine(_workingDirectoryPath, $"{name}.sav"), FileMode.Open, FileAccess.Read)) {
                     using (var reader = new StreamReader(fs)) {
-                        string? line = "";
+                        string line = "";
                         var chunk = new SaveChunk();
                         var inChunk = false;
                         var inMetaData = false;
