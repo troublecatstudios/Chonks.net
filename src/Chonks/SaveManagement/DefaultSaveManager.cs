@@ -15,7 +15,7 @@ namespace Chonks.SaveManagement {
         }
 
         public void LoadSnapshot(SaveContainer container) {
-            if (_depot.TryLoadSave(container.Name, out var chunks)) {
+            if (_depot.TryLoadSave(container.Name, out var chunks, out _)) {
                 _snapshot = chunks;
                 ProcessSnapshotUpdate();
             }
@@ -23,7 +23,7 @@ namespace Chonks.SaveManagement {
 
         public void ApplySnapshot(SaveContainer container) {
             if (_snapshot == null) return;
-            if (_depot.TryWriteSave(container.Name, _snapshot)) {
+            if (_depot.TryWriteSave(container.Name, _snapshot, out _)) {
                 ProcessSnapshotUpdate();
             }
         }
@@ -37,8 +37,10 @@ namespace Chonks.SaveManagement {
                     SaveChunk chunk;
                     if (!chunks.TryGetValue(state.ChunkName, out chunk)) {
                         chunk = new SaveChunk(state.ChunkName);
+                        chunks.Add(chunk.Name, chunk);
                     }
                     chunk.AddToChunk(id, state.Data);
+                    chunks[chunk.Name] = chunk;
                 }
             }
 
@@ -50,16 +52,14 @@ namespace Chonks.SaveManagement {
         }
 
         private void ProcessSnapshotUpdate() {
-            var states = new List<SaveState>();
             foreach (var store in _controller.GetSaveStores()) {
-                states.Clear();
                 var id = store.GetStoreIdentifier();
                 foreach (var chunk in _snapshot) {
                     if (chunk.Data.TryGetValue(id, out var json)) {
-                        states.Add(new SaveState() { ChunkName = chunk.Name, Data = json });
+                        var segment = new ChunkDataSegment(json);
+                        store.ProcessChunkData(chunk.Name, segment);
                     }
                 }
-                store.ProcessStates(states.ToArray());
             }
 
             foreach (var interpreter in _controller.GetSaveInterpreters()) {

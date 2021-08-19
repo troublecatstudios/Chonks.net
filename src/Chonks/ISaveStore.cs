@@ -9,6 +9,6 @@ namespace Chonks {
     public interface ISaveStore {
         string GetStoreIdentifier();
         List<SaveState> CreateSaveStates();
-        void ProcessStates(params SaveState[] states);
+        void ProcessChunkData(string chunkName, ChunkDataSegment data);
     }
 }

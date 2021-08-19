@@ -6,11 +6,10 @@ namespace Chonks.Depots {
         private readonly List<SaveContainer> _containers = new List<SaveContainer>();
         private readonly Dictionary<string, SaveChunk[]> _chunks = new Dictionary<string, SaveChunk[]>();
 
-        public SaveContainer[] ListSaves() {
-            return _containers.ToArray();
-        }
+        public SaveContainer[] ListSaves() => _containers.ToArray();
 
-        public bool TryLoadSave(string name, out SaveChunk[] chunks) {
+        public bool TryLoadSave(string name, out SaveChunk[] chunks, out Exception ex) {
+            ex = null;
             chunks = new SaveChunk[0];
             if (_chunks.TryGetValue(name, out chunks)) {
                 return true;
@@ -18,7 +17,8 @@ namespace Chonks.Depots {
             return false;
         }
 
-        public bool TryWriteSave(string name, SaveChunk[] chunks) {
+        public bool TryWriteSave(string name, SaveChunk[] chunks, out Exception ex) {
+            ex = null;
             if (_chunks.TryAdd(name, chunks)) {
                 _containers.Add(new SaveContainer() { Name = name, CreatedAt = DateTime.UtcNow, LastUpdatedAt = DateTime.UtcNow });
                 return true;

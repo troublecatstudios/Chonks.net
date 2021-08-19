@@ -5,16 +5,13 @@ using System.Collections.Generic;
 namespace Chonks {
 
     [Serializable]
-    public struct SaveChunk {
-        private readonly static JsonSerializer _serializer = JsonSerializer.Create();
-        public Guid Id { get; set; }
+    public class SaveChunk {
+        public Guid Id { get; set; } = Guid.NewGuid();
         public string Name { get; set; }
-        public Dictionary<string, string> Data { get; set; }
+        public Dictionary<string, string> Data { get; set; } = new Dictionary<string, string>();
 
-        public SaveChunk(string name) {
+        public SaveChunk(string name = "") {
             Name = name;
-            Id = Guid.NewGuid();
-            Data = new Dictionary<string, string>();
         }
 
         public override int GetHashCode() {
