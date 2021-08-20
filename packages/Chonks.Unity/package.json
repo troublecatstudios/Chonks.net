@@ -1,0 +1,13 @@
+{
+    "name": "com.troublecat.chonks.unity",
+    "version": "0.0.1",
+    "displayName": "Chonks.net for Unity",
+    "description": "Savegame system for Unity3D projects",
+    "unity": "2020.2",
+    "author": {
+      "name": "Troublecat Studios",
+      "email": "codeimpossible+business@gmail.com",
+      "url": "https://www.github.com/troublecatstudios"
+    },
+    "type": "library"
+  }
