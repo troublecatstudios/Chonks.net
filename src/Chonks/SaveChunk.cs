@@ -1,5 +1,4 @@
-﻿using Newtonsoft.Json;
-using System;
+﻿using System;
 using System.Collections.Generic;
 
 namespace Chonks {
@@ -19,7 +18,7 @@ namespace Chonks {
         }
 
         public void AddToChunk(string key, object data) {
-            var json = JsonConvert.SerializeObject(data);
+            var json = SerializationUtility.SerializeObject(data);
             Data.Add(key, json);
         }
     }

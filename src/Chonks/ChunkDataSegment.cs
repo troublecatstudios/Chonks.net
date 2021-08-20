@@ -1,5 +1,4 @@
-﻿using Newtonsoft.Json;
-using System;
+﻿using System;
 using System.Collections.Generic;
 
 namespace Chonks {
@@ -7,11 +6,11 @@ namespace Chonks {
         private readonly Dictionary<string, object> _container = new Dictionary<string, object>();
         public ChunkDataSegment() { }
         public ChunkDataSegment(string json) {
-            _container = JsonConvert.DeserializeObject<Dictionary<string, object>>(json);
+            _container = SerializationUtility.DeserializeObject<Dictionary<string, object>>(json);
         }
 
         public string ToJson() {
-            return JsonConvert.SerializeObject(_container);
+            return SerializationUtility.SerializeObject(_container);
         }
 
         public Type CheckType(string key) => ContainsKey(key) ? _container[key].GetType() : null;
