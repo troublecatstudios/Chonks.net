@@ -23,7 +23,8 @@ namespace Chonks.SaveManagement {
 
         public void ApplySnapshot(SaveContainer container) {
             if (_snapshot == null) return;
-            if (_depot.TryWriteSave(container.Name, _snapshot, out _)) {
+            var snapshot = ProcessInterpreters(_snapshot);
+            if (_depot.TryWriteSave(container.Name, snapshot, out _)) {
                 ProcessSnapshotUpdate();
             }
         }
@@ -49,6 +50,14 @@ namespace Chonks.SaveManagement {
             foreach (var interpreter in _controller.GetSaveInterpreters()) {
                 interpreter.ProcessChunks(_snapshot);
             }
+        }
+
+        private SaveChunk[] ProcessInterpreters(SaveChunk[] chunks) {
+            foreach (var interpreter in _controller.GetSaveInterpreters()) {
+                if (!interpreter.IsDirty()) continue;
+                chunks = interpreter.ApplyModifications(chunks);
+            }
+            return chunks;
         }
 
         private void ProcessSnapshotUpdate() {
