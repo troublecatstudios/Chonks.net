@@ -1,0 +1,23 @@
+﻿[
+  {
+    "Name": "global",
+    "Id": "9cd9056c-e6c9-405e-b6f6-5a5b56153bfb",
+    "Data": {
+      "ExampleObjectId": "{ \"Test\": 10 }"
+    }
+  },
+  {
+    "Name": "46f1d784-95d2-4804-862a-23942aed134b",
+    "Id": "d1982353-d8ce-4674-891f-a78b65e37b60",
+    "Data": {
+      "ExampleObjectId": "{ \"Test\": 10 }"
+    }
+  },
+  {
+    "Name": "35c1e961-2e94-404c-b66c-d90dc2b3ed3d",
+    "Id": "97fe9265-41d6-44d0-98af-c570131a665a",
+    "Data": {
+      "ExampleObjectId": "{ \"Test\": 10 }"
+    }
+  }
+]

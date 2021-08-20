@@ -1,0 +1,18 @@
+﻿
+uid: 9cd9056c-e6c9-405e-b6f6-5a5b56153bfb
+name: global
+---
+ExampleObjectId: { "Test": 10 }
+===
+
+uid: d1982353-d8ce-4674-891f-a78b65e37b60
+name: 46f1d784-95d2-4804-862a-23942aed134b
+---
+ExampleObjectId: { "Test": 10 }
+===
+
+uid: 97fe9265-41d6-44d0-98af-c570131a665a
+name: 35c1e961-2e94-404c-b66c-d90dc2b3ed3d
+---
+ExampleObjectId: { "Test": 10 }
+===
