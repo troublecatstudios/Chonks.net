@@ -1,44 +1,35 @@
-﻿using System;
+﻿using Newtonsoft.Json.Linq;
+using System;
 using System.Collections.Generic;
 
 namespace Chonks {
     public class ChunkDataSegment {
         private readonly Dictionary<string, object> _container = new Dictionary<string, object>();
+        private readonly string _json;
+        private JObject _jobject;
         public ChunkDataSegment() { }
         public ChunkDataSegment(string json) {
             _container = SerializationUtility.DeserializeObject<Dictionary<string, object>>(json);
+            _json = json;
+            _jobject = JObject.Parse(json);
         }
 
-        public string ToJson() {
-            return SerializationUtility.SerializeObject(_container);
-        }
+        public string ToJson() => SerializationUtility.SerializeObject(_container);
+
+        public T As<T>() => SerializationUtility.DeserializeObject<T>(_json);
 
         public Type CheckType(string key) => ContainsKey(key) ? _container[key].GetType() : null;
 
         public bool ContainsKey(string key) => _container.ContainsKey(key);
 
-        public bool TryAdd(string key, object value) {
-#if NETSTANDARD2_0
-            if (_container.ContainsKey(key)) return false;
-            _container.Add(key, value);
-            return true;
-#else
-            return _container.TryAdd(key, value);
-#endif
-        }
-
-        public bool TryGetInt(string key, out int integer) {
-            integer = -1;
-            if (_container.TryGetValue(key, out var value)) {
-                integer = Convert.ToInt32(value);
-                return true;
-            }
-            return false;
-        }
-
         public T Get<T>(string key) {
             if (!ContainsKey(key)) {
                 throw new KeyNotFoundException($"The key {key} was not found in the collection.");
+            }
+
+            if (_jobject.ContainsKey(key)) {
+                var json = _jobject[key].ToString(Newtonsoft.Json.Formatting.None);
+                return SerializationUtility.DeserializeObject<T>(json);
             }
 
             object box;
@@ -54,22 +45,5 @@ namespace Chonks {
             return (T)_container[key];
         }
 
-        public bool TryGetBool(string key, out bool boolean) {
-            boolean = false;
-            if (_container.TryGetValue(key, out var value)) {
-                boolean = (bool)value;
-                return true;
-            }
-            return false;
-        }
-
-        public bool TryGetString(string key, out string stringValue) {
-            stringValue = null;
-            if (_container.TryGetValue(key, out var value)) {
-                stringValue = value.ToString();
-                return true;
-            }
-            return false;
-        }
     }
 }
