@@ -6,15 +6,16 @@ namespace Chonks.Tests.Fakes {
         private static int _counter = 0;
         private SaveState[] _states;
 
+        private string _id;
+
         private Dictionary<string, ChunkDataSegment> _chunkData = new Dictionary<string, ChunkDataSegment>();
 
-        public FakeSaveStore(params SaveState[] states) {
+        public FakeSaveStore(params SaveState[] states) : this() {
             _states = states;
-            _counter++;
         }
 
         public FakeSaveStore() {
-            _counter++;
+            _id = $"FAKE-{_counter++}";
         }
 
         public SaveState[] States => _states;
@@ -22,7 +23,7 @@ namespace Chonks.Tests.Fakes {
 
         public List<SaveState> CreateSaveStates() => _states.ToList();
 
-        public string GetStoreIdentifier() => $"FAKE-{_counter}";
+        public string GetStoreIdentifier() => _id;
 
         public void ProcessChunkData(string chunkName, ChunkDataSegment data) {
             if (_chunkData.ContainsKey(chunkName)) {

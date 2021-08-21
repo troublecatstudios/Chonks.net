@@ -3,6 +3,8 @@ using Chonks.SaveManagement;
 using Chonks.Tests.Fakes;
 using Moq;
 using Newtonsoft.Json;
+using System;
+using System.Collections.Generic;
 using Xunit;
 
 namespace Chonks.Tests {
@@ -69,7 +71,81 @@ namespace Chonks.Tests {
         }
 
         public class ApplySnapshot : DefaultSaveManagerTests {
+            [Fact]
+            public void InterpretersAreCalledAfterSnapshot() {
+                var mockInterpreter = new Mock<ISaveInterpreter>(MockBehavior.Strict);
+                mockInterpreter.Setup(m => m.ProcessChunks(It.IsAny<SaveChunk[]>())).Verifiable();
+                mockInterpreter.Setup(m => m.IsDirty()).Returns(false).Verifiable();
 
+                var store = new FakeSaveStore(new SaveState() { ChunkName = "global", Data = new { Test = 10 } });
+                _controller.RegisterSaveStore(store);
+                _controller.RegisterSaveInterpreter(mockInterpreter.Object);
+
+                var depot = TestHelpers.GenerateFakeSaveData("Save1", store);
+
+                var manager = new DefaultSaveManager(_controller, depot);
+
+                manager.MakeSnapshot();
+                manager.ApplySnapshot(new SaveContainer() { Name = "Save1" });
+
+                mockInterpreter.Verify();
+
+                _controller.UnregisterSaveStore(store);
+            }
+
+            [Fact]
+            public void WhenInterpretersAreDirty_TheyCanModifyTheSnapshotBeforeSave() {
+                var modifiedChunks = new SaveChunk[] {
+                    new SaveChunk("__test") {
+                        Data = new Dictionary<string, string>() {
+                            { "Testing", "25" }
+                        }
+                    }
+                };
+                Exception mockDepotException = null;
+
+                var mockInterpreter = new Mock<ISaveInterpreter>(MockBehavior.Strict);
+                mockInterpreter.Setup(m => m.ProcessChunks(It.IsAny<SaveChunk[]>())).Verifiable();
+                mockInterpreter.Setup(m => m.IsDirty()).Returns(true).Verifiable();
+                mockInterpreter.Setup(m => m.ApplyModifications(It.IsAny<SaveChunk[]>())).Returns(modifiedChunks).Verifiable();
+
+                var mockDepot = new Mock<ISaveDepot>(MockBehavior.Strict);
+                mockDepot.Setup(m => m.TryWriteSave("Save1", It.Is<SaveChunk[]>(i => i == modifiedChunks), out mockDepotException)).Returns(true);
+
+                var store = new FakeSaveStore(new SaveState() { ChunkName = "global", Data = new { Test = 10 } });
+                _controller.RegisterSaveStore(store);
+                _controller.RegisterSaveInterpreter(mockInterpreter.Object);
+
+                var manager = new DefaultSaveManager(_controller, mockDepot.Object);
+
+                manager.MakeSnapshot();
+                manager.ApplySnapshot(new SaveContainer() { Name = "Save1" });
+
+                mockInterpreter.Verify();
+                mockDepot.Verify();
+
+                _controller.UnregisterSaveStore(store);
+            }
+
+            [Fact]
+            public void SaveStoresAreCalledAfterSnapshot() {
+                var store = new FakeSaveStore(new SaveState() { ChunkName = "global", Data = new { Test = 10 } });
+                _controller.RegisterSaveStore(store);
+
+                var depot = TestHelpers.GenerateFakeSaveData("Save1", store);
+
+                var manager = new DefaultSaveManager(_controller, depot);
+
+                Assert.Empty(store.ChunkData);
+
+                manager.MakeSnapshot();
+                manager.ApplySnapshot(new SaveContainer() { Name = "Save1" });
+
+                Assert.Single(store.ChunkData);
+                Assert.Equal(10, store.ChunkData["global"].Get<int>("Test"));
+
+                _controller.UnregisterSaveStore(store);
+            }
         }
 
         public class MakeSnapshot : DefaultSaveManagerTests {
