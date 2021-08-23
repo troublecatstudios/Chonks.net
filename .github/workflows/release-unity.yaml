@@ -3,6 +3,8 @@ name: Release Chonks.dll to Chonks.Unity
 on:
   push:
     branches: [ develop ]
+    paths:
+    - 'src/**'
 
 jobs:
   release:
@@ -25,7 +27,7 @@ jobs:
         git config user.name github-actions
         git config user.email github-actions@github.com
         git add ./packages/Chonks.Unity/Chonks.dll
-        git commit -m 'update Chonks.dll for Chonks.Unity'
+        git commit -m ':shipit: update Chonks.dll for Chonks.Unity'
         git push
     
       
