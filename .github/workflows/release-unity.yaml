@@ -3,6 +3,8 @@ name: Release Chonks.dll to Chonks.Unity
 on:
   push:
     branches: [ develop ]
+    paths:
+    - 'src/**'
 
 jobs:
   release:
@@ -19,11 +21,13 @@ jobs:
     - name: Build
       run: dotnet build --no-restore --configuration Release
     - name: Copy DLL To Chonks.Unity Package Directory
-      run: cp ./src/Chonks/bin/Release/netstandard2.0/Chonks.dll ./Packages/Chonks.Unity
+      run: cp ./src/Chonks/bin/Release/netstandard2.0/Chonks.dll ./packages/Chonks.Unity
     - name: Publish DLL
       run: |
-        git add ./Packages/Chonks.Unity/Chonks.dll
-        git commit -m 'update Chonks.dll for Chonks.Unity'
+        git config user.name github-actions
+        git config user.email github-actions@github.com
+        git add ./packages/Chonks.Unity/Chonks.dll
+        git commit -m ':shipit: update Chonks.dll for Chonks.Unity'
         git push
     
       

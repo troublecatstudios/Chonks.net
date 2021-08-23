@@ -3,6 +3,9 @@ name: Build .NET
 on:
   push:
     branches: [ develop ]
+    paths:
+    - 'src/**'
+    - 'tests/**'
   pull_request:
     branches: [ develop ]
 
@@ -25,14 +28,7 @@ jobs:
     - name: Restore dependencies
       run: dotnet restore
     - name: Build
-      run: dotnet build --no-restore --configuration Release
+      run: dotnet build --no-restore
     - name: Test
       run: dotnet test --no-build --verbosity normal
-    - name: Copy DLL To Chonks.Unity Package Directory
-      run: cp ./src/Chonks/bin/Release/netstandard2.0/Chonks.dll ./Packages/Chonks.Unity
-    - name: Publish DLL
-      run: |
-        git add ./Packages/Chonks.Unity/Chonks.dll
-        git commit -m 'update Chonks.dll for Chonks.Unity'
-        git push
       
