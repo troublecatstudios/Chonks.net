@@ -1,0 +1,29 @@
+name: Release Chonks.dll to Chonks.Unity
+
+on:
+  push:
+    branches: [ develop ]
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    name: Release Chonks DLL
+    steps:
+    - uses: actions/checkout@v2
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v1
+      with:
+        dotnet-version: ${{ matrix.dotnet }}
+    - name: Restore dependencies
+      run: dotnet restore
+    - name: Build
+      run: dotnet build --no-restore --configuration Release
+    - name: Copy DLL To Chonks.Unity Package Directory
+      run: cp ./src/Chonks/bin/Release/netstandard2.0/Chonks.dll ./Packages/Chonks.Unity
+    - name: Publish DLL
+      run: |
+        git add ./Packages/Chonks.Unity/Chonks.dll
+        git commit -m 'update Chonks.dll for Chonks.Unity'
+        git push
+    
+      
