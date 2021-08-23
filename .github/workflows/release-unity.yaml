@@ -22,6 +22,8 @@ jobs:
       run: cp ./src/Chonks/bin/Release/netstandard2.0/Chonks.dll ./packages/Chonks.Unity
     - name: Publish DLL
       run: |
+        git config user.name github-actions
+        git config user.email github-actions@github.com
         git add ./packages/Chonks.Unity/Chonks.dll
         git commit -m 'update Chonks.dll for Chonks.Unity'
         git push
