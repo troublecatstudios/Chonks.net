@@ -21,7 +21,7 @@ public class Animator2D : MonoBehaviour, ISaveStore {
         return $"{gameObject.name}_Animator2D";
     }
 
-    public List<SaveState> CreateSaveStates() {
+    public List<SaveState> GetSaveStates() {
         return new List<SaveState>() {
             new SaveState() {
                 ChunkName = gameObject.name,
@@ -33,7 +33,7 @@ public class Animator2D : MonoBehaviour, ISaveStore {
         };
     }
 
-    public void ProcessChunkData(string chunkName, ChunkDataSegment data) {
+    public void LoadChunkData(string chunkName, ChunkDataSegment data) {
         var state = data.As<AnimatorSaveState>();
         _spriteIndex = state.SpriteIndex;
         _frameTimer = state.FrameTimer;

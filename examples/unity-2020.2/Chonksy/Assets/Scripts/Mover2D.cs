@@ -17,7 +17,7 @@ public class Mover2D : MonoBehaviour, ISaveStore {
         public Vector3 Position { get; set; }
     }
 
-    public List<SaveState> CreateSaveStates() {
+    public List<SaveState> GetSaveStates() {
         return new List<SaveState>() {
             new SaveState() {
                 ChunkName = gameObject.name,
@@ -31,7 +31,7 @@ public class Mover2D : MonoBehaviour, ISaveStore {
 
     public string GetStoreIdentifier() => $"{gameObject.name}_Mover2D";
 
-    public void ProcessChunkData(string chunkName, ChunkDataSegment data) {
+    public void LoadChunkData(string chunkName, ChunkDataSegment data) {
         var state = data.As<MoverSaveState>();
         _direction = state.Direction;
         transform.position = state.Position;
