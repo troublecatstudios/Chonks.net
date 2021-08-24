@@ -1,6 +1,6 @@
 {
     "name": "com.troublecat.chonks.unity",
-    "version": "0.0.3",
+    "version": "0.1.0",
     "displayName": "Chonks.net for Unity",
     "description": "Savegame system for Unity3D projects",
     "unity": "2020.2",
