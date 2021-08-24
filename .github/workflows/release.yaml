@@ -1,9 +1,8 @@
 name: Release
 
-on: 
-  push:
-    branches:
-      - stable
+on:
+  release:
+    types: [published]
 
 jobs:
   release:
