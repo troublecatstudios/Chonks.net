@@ -1,5 +1,4 @@
 const { promisify } = require('util')
-const dateFormat = require('dateformat')
 const readFileAsync = promisify(require('fs').readFile)
 const path = require('path');
 
@@ -26,9 +25,7 @@ module.exports = {
           template,
           partials: { commitTemplate },
           helpers: {
-            datetime: function (format = 'UTC:yyyy-mm-dd') {
-              return dateFormat(new Date(), format)
-            }
+
           },
           issueResolution: {
             template: '{baseUrl}/{owner}/{repo}/issues/{ref}',
@@ -38,7 +35,17 @@ module.exports = {
         }
       }
     ],
-    '@semantic-release/git',
+    [
+      '@semantic-release/git',
+      {
+          assets: [
+              'package.json',
+              'CHANGELOG.md'
+          ],
+          message: '🧹: ${nextRelease.version} [skip ci]\n\n${nextRelease.notes}'
+      }
+    ],
+    '@semantic-release/github',
     '@semantic-release/changelog'
   ]
 }
