@@ -1,4 +1,5 @@
 using Chonks.Unity;
+using System;
 using System.Collections.Generic;
 using UnityEditor;
 using UnityEngine;
@@ -7,6 +8,7 @@ namespace Chonks.UnityEditor {
 
     [CustomEditor(typeof(UnitySaveManager))]
     public class UnitySaveManagerInspector : Editor {
+        [NonSerialized]
         private List<IUnityEditorInterpreter> _editorInterpreters = new List<IUnityEditorInterpreter>() {
             new ListChunksInterpreter()
         };
