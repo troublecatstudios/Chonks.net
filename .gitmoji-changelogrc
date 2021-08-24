@@ -1,0 +1,7 @@
+{
+  "project": {
+    "name": "Chonks.net",
+    "description": "Chonks is a save system for dotnet based game engines (Unity3D, MonoGame)",
+    "version": "0.1.0"
+  }
+}
