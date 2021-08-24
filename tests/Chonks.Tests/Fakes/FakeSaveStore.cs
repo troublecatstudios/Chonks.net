@@ -21,11 +21,11 @@ namespace Chonks.Tests.Fakes {
         public SaveState[] States => _states;
         public Dictionary<string, ChunkDataSegment> ChunkData => _chunkData;
 
-        public List<SaveState> CreateSaveStates() => _states.ToList();
+        public List<SaveState> GetSaveStates() => _states.ToList();
 
         public string GetStoreIdentifier() => _id;
 
-        public void ProcessChunkData(string chunkName, ChunkDataSegment data) {
+        public void LoadChunkData(string chunkName, ChunkDataSegment data) {
             if (_chunkData.ContainsKey(chunkName)) {
                 _chunkData.Remove(chunkName);
             }

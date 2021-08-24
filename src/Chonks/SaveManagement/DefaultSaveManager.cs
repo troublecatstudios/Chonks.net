@@ -4,14 +4,37 @@ using System.Linq;
 
 namespace Chonks.SaveManagement {
     public class DefaultSaveManager : ISaveManager {
-        private readonly ISaveController _controller;
         private readonly ISaveDepot _depot;
+
+        private readonly IRegistry<ISaveStore> _storeRegistry;
+        private readonly IRegistry<ISaveInterpreter> _interpreterRegistry;
 
         private SaveChunk[] _snapshot;
 
-        public DefaultSaveManager(ISaveController controller = null, ISaveDepot depot = null) {
-            _controller = controller ?? new DefaultSaveController();
+        public DefaultSaveManager(IRegistry<ISaveStore> storeRegistry = null, IRegistry<ISaveInterpreter> interpreterRegistry = null, ISaveDepot depot = null) {
             _depot = depot ?? new InMemorySaveDepot();
+            _storeRegistry = storeRegistry ?? new Registry<ISaveStore>();
+            _interpreterRegistry = interpreterRegistry ?? new Registry<ISaveInterpreter>();
+
+            _interpreterRegistry.OnItemRegistered += _interpreterRegistry_OnItemRegistered;
+            _storeRegistry.OnItemRegistered += _storeRegistry_OnItemRegistered;
+        }
+
+        private void _storeRegistry_OnItemRegistered(ISaveStore item) {
+            // notify any newly registered stores of data in the save for them
+            var id = item.GetStoreIdentifier();
+            if (_snapshot == null) return;
+            foreach (var chunk in _snapshot) {
+                if (chunk.Data.TryGetValue(id, out var json)) {
+                    var segment = new ChunkDataSegment(json);
+                    item.LoadChunkData(chunk.Name, segment);
+                }
+            }
+        }
+
+        private void _interpreterRegistry_OnItemRegistered(ISaveInterpreter item) {
+            if (_snapshot == null) return;
+            item.ProcessChunks(_snapshot);
         }
 
         public void LoadSnapshot(SaveContainer container) {
@@ -31,10 +54,11 @@ namespace Chonks.SaveManagement {
 
         public void MakeSnapshot() {
             var chunks = new Dictionary<string, SaveChunk>();
-            foreach (var store in _controller.GetSaveStores()) {
+            foreach (var store in _storeRegistry.List()) {
                 var id = store.GetStoreIdentifier();
-                var states = store.CreateSaveStates();
+                var states = store.GetSaveStates();
                 foreach (var state in states) {
+                    if (state == null) continue;
                     SaveChunk chunk;
                     if (!chunks.TryGetValue(state.ChunkName, out chunk)) {
                         chunk = new SaveChunk(state.ChunkName);
@@ -47,13 +71,13 @@ namespace Chonks.SaveManagement {
 
             _snapshot = chunks.Select((pair) => pair.Value).ToArray();
 
-            foreach (var interpreter in _controller.GetSaveInterpreters()) {
+            foreach (var interpreter in _interpreterRegistry.List()) {
                 interpreter.ProcessChunks(_snapshot);
             }
         }
 
         private SaveChunk[] ProcessInterpreters(SaveChunk[] chunks) {
-            foreach (var interpreter in _controller.GetSaveInterpreters()) {
+            foreach (var interpreter in _interpreterRegistry.List()) {
                 if (!interpreter.IsDirty()) continue;
                 chunks = interpreter.ApplyModifications(chunks);
             }
@@ -61,17 +85,17 @@ namespace Chonks.SaveManagement {
         }
 
         private void ProcessSnapshotUpdate() {
-            foreach (var store in _controller.GetSaveStores()) {
+            foreach (var store in _storeRegistry.List()) {
                 var id = store.GetStoreIdentifier();
                 foreach (var chunk in _snapshot) {
                     if (chunk.Data.TryGetValue(id, out var json)) {
                         var segment = new ChunkDataSegment(json);
-                        store.ProcessChunkData(chunk.Name, segment);
+                        store.LoadChunkData(chunk.Name, segment);
                     }
                 }
             }
 
-            foreach (var interpreter in _controller.GetSaveInterpreters()) {
+            foreach (var interpreter in _interpreterRegistry.List()) {
                 interpreter.ProcessChunks(_snapshot);
             }
         }

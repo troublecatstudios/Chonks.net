@@ -9,12 +9,34 @@ using Xunit;
 
 namespace Chonks.Tests {
     public class DefaultSaveManagerTests {
-        private readonly ISaveDepot _inMemoryDepot = new InMemorySaveDepot();
-        private readonly ISaveController _controller = new DefaultSaveController();
-        private readonly ISaveManager _saveManager;
+        public class RegistrationTests : DefaultSaveManagerTests {
+            [Fact]
+            public void SaveStoresAreNotifiedWhenTheyAreRegistered() {
+                var store = new FakeSaveStore();
+                var storeRegistry = new Registry<ISaveStore>();
 
-        public DefaultSaveManagerTests() {
-            _saveManager = new DefaultSaveManager(_controller, _inMemoryDepot);
+                var depot = TestHelpers.GenerateFakeSaveData("Save1", store);
+
+                var manager = new DefaultSaveManager(storeRegistry, depot: depot);
+
+                // register the store AFTER the snapshot is loaded.
+
+                manager.LoadSnapshot(new SaveContainer() { Name = "Save1" });
+
+                // our state inside the store should be empty right now
+                Assert.Empty(store.ChunkData);
+
+                // register the store
+                storeRegistry.Register(store);
+
+                // our store should have received the test data back as a save state
+                Assert.Single(store.ChunkData);
+                Assert.True(store.ChunkData.ContainsKey("global"));
+
+                var restoredGlobalChunk = store.ChunkData["global"];
+                Assert.True(restoredGlobalChunk.ContainsKey("Test"));
+                Assert.Equal(10, restoredGlobalChunk.Get<int>("Test"));
+            }
         }
 
         public class LoadSnapshot : DefaultSaveManagerTests {
@@ -25,13 +47,13 @@ namespace Chonks.Tests {
             [Fact]
             public void SaveStoresArePassedCorrectChunkData() {
                 var store = new FakeSaveStore();
-
+                var storeRegistry = new Registry<ISaveStore>();
                 var depot = TestHelpers.GenerateFakeSaveData("Save1", store);
 
-                var manager = new DefaultSaveManager(_controller, depot);
+                var manager = new DefaultSaveManager(storeRegistry, depot: depot);
 
                 // register our store with the controller so it receives callbacks
-                _controller.RegisterSaveStore(store);
+                storeRegistry.Register(store);
 
                 // our state inside the store should be empty right now
                 Assert.Empty(store.ChunkData);
@@ -45,56 +67,59 @@ namespace Chonks.Tests {
                 var restoredGlobalChunk = store.ChunkData["global"];
                 Assert.True(restoredGlobalChunk.ContainsKey("Test"));
                 Assert.Equal(10, restoredGlobalChunk.Get<int>("Test"));
-
-                _controller.UnregisterSaveStore(store);
             }
 
             [Fact]
             public void InterpretersAreCalledAfterSnapshot() {
+                var storeRegistry = new Registry<ISaveStore>();
+                var interpreterRegistry = new Registry<ISaveInterpreter>();
+
                 var mockInterpreter = new Mock<ISaveInterpreter>(MockBehavior.Strict);
                 mockInterpreter.Setup(m => m.ProcessChunks(It.IsAny<SaveChunk[]>())).Verifiable();
 
                 var store = new FakeSaveStore(new SaveState() { ChunkName = "global", Data = new { Test = 10 } });
-                _controller.RegisterSaveStore(store);
-                _controller.RegisterSaveInterpreter(mockInterpreter.Object);
+                storeRegistry.Register(store);
+                interpreterRegistry.Register(mockInterpreter.Object);
 
                 var depot = TestHelpers.GenerateFakeSaveData("Save1", store);
 
-                var manager = new DefaultSaveManager(_controller, depot);
+                var manager = new DefaultSaveManager(storeRegistry, interpreterRegistry, depot);
 
                 manager.LoadSnapshot(new SaveContainer() { Name = "Save1" });
 
                 mockInterpreter.Verify();
-
-                _controller.UnregisterSaveStore(store);
             }
         }
 
         public class ApplySnapshot : DefaultSaveManagerTests {
             [Fact]
             public void InterpretersAreCalledAfterSnapshot() {
+                var storeRegistry = new Registry<ISaveStore>();
+                var interpreterRegistry = new Registry<ISaveInterpreter>();
+
                 var mockInterpreter = new Mock<ISaveInterpreter>(MockBehavior.Strict);
                 mockInterpreter.Setup(m => m.ProcessChunks(It.IsAny<SaveChunk[]>())).Verifiable();
                 mockInterpreter.Setup(m => m.IsDirty()).Returns(false).Verifiable();
 
                 var store = new FakeSaveStore(new SaveState() { ChunkName = "global", Data = new { Test = 10 } });
-                _controller.RegisterSaveStore(store);
-                _controller.RegisterSaveInterpreter(mockInterpreter.Object);
+                storeRegistry.Register(store);
+                interpreterRegistry.Register(mockInterpreter.Object);
 
                 var depot = TestHelpers.GenerateFakeSaveData("Save1", store);
 
-                var manager = new DefaultSaveManager(_controller, depot);
+                var manager = new DefaultSaveManager(storeRegistry, interpreterRegistry, depot);
 
                 manager.MakeSnapshot();
                 manager.ApplySnapshot(new SaveContainer() { Name = "Save1" });
 
                 mockInterpreter.Verify();
-
-                _controller.UnregisterSaveStore(store);
             }
 
             [Fact]
             public void WhenInterpretersAreDirty_TheyCanModifyTheSnapshotBeforeSave() {
+                var storeRegistry = new Registry<ISaveStore>();
+                var interpreterRegistry = new Registry<ISaveInterpreter>();
+
                 var modifiedChunks = new SaveChunk[] {
                     new SaveChunk("__test") {
                         Data = new Dictionary<string, string>() {
@@ -113,28 +138,27 @@ namespace Chonks.Tests {
                 mockDepot.Setup(m => m.TryWriteSave("Save1", It.Is<SaveChunk[]>(i => i == modifiedChunks), out mockDepotException)).Returns(true);
 
                 var store = new FakeSaveStore(new SaveState() { ChunkName = "global", Data = new { Test = 10 } });
-                _controller.RegisterSaveStore(store);
-                _controller.RegisterSaveInterpreter(mockInterpreter.Object);
+                storeRegistry.Register(store);
+                interpreterRegistry.Register(mockInterpreter.Object);
 
-                var manager = new DefaultSaveManager(_controller, mockDepot.Object);
+                var manager = new DefaultSaveManager(storeRegistry, interpreterRegistry, mockDepot.Object);
 
                 manager.MakeSnapshot();
                 manager.ApplySnapshot(new SaveContainer() { Name = "Save1" });
 
                 mockInterpreter.Verify();
                 mockDepot.Verify();
-
-                _controller.UnregisterSaveStore(store);
             }
 
             [Fact]
             public void SaveStoresAreCalledAfterSnapshot() {
+                var storeRegistry = new Registry<ISaveStore>();
                 var store = new FakeSaveStore(new SaveState() { ChunkName = "global", Data = new { Test = 10 } });
-                _controller.RegisterSaveStore(store);
+                storeRegistry.Register(store);
 
                 var depot = TestHelpers.GenerateFakeSaveData("Save1", store);
 
-                var manager = new DefaultSaveManager(_controller, depot);
+                var manager = new DefaultSaveManager(storeRegistry, depot: depot);
 
                 Assert.Empty(store.ChunkData);
 
@@ -143,47 +167,72 @@ namespace Chonks.Tests {
 
                 Assert.Single(store.ChunkData);
                 Assert.Equal(10, store.ChunkData["global"].Get<int>("Test"));
-
-                _controller.UnregisterSaveStore(store);
             }
         }
 
         public class MakeSnapshot : DefaultSaveManagerTests {
+
+            [Fact]
+            public void NullSaveStatesAreIgnored() {
+                var depot = new InMemorySaveDepot();
+                var storeRegistry = new Registry<ISaveStore>();
+                var store = new FakeSaveStore(new SaveState[] { null });
+                storeRegistry.Register(store);
+
+                var manager = new DefaultSaveManager(storeRegistry, depot: depot);
+                manager.MakeSnapshot();
+                manager.ApplySnapshot(new SaveContainer() { Name = "TestSave" });
+
+                var storeId = store.GetStoreIdentifier();
+                var expectedJSON = JsonConvert.SerializeObject(new { });
+                var didSave = depot.TryLoadSave("TestSave", out var chunks, out _);
+
+                Assert.True(didSave);
+                Assert.Empty(chunks);
+                Assert.NotNull(chunks);
+            }
+
             [Fact]
             public void DataIsPulledFromStores() {
+                var depot = new InMemorySaveDepot();
+                var storeRegistry = new Registry<ISaveStore>();
                 var store = new FakeSaveStore(new SaveState() { ChunkName = "global", Data = new { Test = 10 } });
-                _controller.RegisterSaveStore(store);
+                storeRegistry.Register(store);
 
-                _saveManager.MakeSnapshot();
-                _saveManager.ApplySnapshot(new SaveContainer() { Name = "TestSave" });
+                var manager = new DefaultSaveManager(storeRegistry, depot: depot);
+
+                manager.MakeSnapshot();
+                manager.ApplySnapshot(new SaveContainer() { Name = "TestSave" });
 
                 var expectedJSON = JsonConvert.SerializeObject(new { Test = 10 });
                 var storeId = store.GetStoreIdentifier();
-                var didSave = _inMemoryDepot.TryLoadSave("TestSave", out var chunks, out _);
+                var didSave = depot.TryLoadSave("TestSave", out var chunks, out _);
 
                 Assert.True(didSave);
                 Assert.Single(chunks);
                 Assert.Equal("global", chunks[0].Name);
                 Assert.True(chunks[0].Data.ContainsKey(storeId));
                 Assert.Equal(expectedJSON, chunks[0].Data[storeId]);
-
-                _controller.UnregisterSaveStore(store);
             }
 
             [Fact]
             public void InterpretersAreCalledAfterSnapshot() {
+                var depot = new InMemorySaveDepot();
+                var storeRegistry = new Registry<ISaveStore>();
+                var interpreterRegistry = new Registry<ISaveInterpreter>();
+
                 var mockInterpreter = new Mock<ISaveInterpreter>(MockBehavior.Strict);
                 mockInterpreter.Setup(m => m.ProcessChunks(It.IsAny<SaveChunk[]>())).Verifiable();
 
-                var store = new FakeSaveStore(new SaveState() { ChunkName = "global", Data = new { Test = 10 } });
-                _controller.RegisterSaveStore(store);
-                _controller.RegisterSaveInterpreter(mockInterpreter.Object);
+                var manager = new DefaultSaveManager(storeRegistry, interpreterRegistry, depot);
 
-                _saveManager.MakeSnapshot();
+                var store = new FakeSaveStore(new SaveState() { ChunkName = "global", Data = new { Test = 10 } });
+                storeRegistry.Register(store);
+                interpreterRegistry.Register(mockInterpreter.Object);
+
+                manager.MakeSnapshot();
 
                 mockInterpreter.Verify();
-
-                _controller.UnregisterSaveStore(store);
             }
         }
     }
