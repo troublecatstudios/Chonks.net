@@ -1,0 +1,9 @@
+{
+    "name": "com.troublecat.chonks",
+    "version": "0.0.1",
+    "displayName": "Chonks.net",
+    "description": "Savegame system for C# (Unity3D, Monogame) projects",
+    "dependencies": {
+        "semantic-release-gitmoji": "*"
+    }
+  }
