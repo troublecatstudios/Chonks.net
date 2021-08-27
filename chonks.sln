@@ -18,6 +18,12 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "docs", "docs", "{C729EB42-8
 		README.md = README.md
 	EndProjectSection
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "other files", "other files", "{5807D91F-EF67-4EB4-AA5E-EDE63915519E}"
+	ProjectSection(SolutionItems) = preProject
+		.gitignore = .gitignore
+		.gitmoji-changelogrc = .gitmoji-changelogrc
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
