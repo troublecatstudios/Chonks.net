@@ -14,7 +14,7 @@ namespace Chonks {
             _jobject = JObject.Parse(json);
         }
 
-        public string ToJson() => SerializationUtility.SerializeObject(_container);
+        public string ToJson() => _json;
 
         public T As<T>() => SerializationUtility.DeserializeObject<T>(_json);
 
