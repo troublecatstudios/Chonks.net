@@ -1,4 +1,5 @@
 ﻿using Chonks.Depots;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -27,7 +28,7 @@ namespace Chonks.SaveManagement {
             foreach (var chunk in _snapshot) {
                 if (chunk.Data.TryGetValue(id, out var json)) {
                     var segment = new ChunkDataSegment(json);
-                    item.LoadChunkData(chunk.Name, segment);
+                    item.LoadChunkData(chunk.Name, segment, out _);
                 }
             }
         }
@@ -85,14 +86,22 @@ namespace Chonks.SaveManagement {
         }
 
         private void ProcessSnapshotUpdate() {
+            var postChunkLoadCallbacks = new List<Action>();
             foreach (var store in _storeRegistry.List()) {
                 var id = store.GetStoreIdentifier();
                 foreach (var chunk in _snapshot) {
                     if (chunk.Data.TryGetValue(id, out var json)) {
                         var segment = new ChunkDataSegment(json);
-                        store.LoadChunkData(chunk.Name, segment);
+                        Action callback = null;
+                        store.LoadChunkData(chunk.Name, segment, out callback);
+
+                        if (callback != null) postChunkLoadCallbacks.Add(callback);
                     }
                 }
+            }
+
+            foreach (var callback in postChunkLoadCallbacks) {
+                callback?.Invoke();
             }
 
             foreach (var interpreter in _interpreterRegistry.List()) {

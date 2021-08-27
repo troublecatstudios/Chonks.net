@@ -168,6 +168,26 @@ namespace Chonks.Tests {
                 Assert.Single(store.ChunkData);
                 Assert.Equal(10, store.ChunkData["global"].Get<int>("Test"));
             }
+
+            [Fact]
+            public void SaveStoreCallbacksAreCalledAfterSnapshot() {
+                var wasCallbackCalled = false;
+                Action callback = () => wasCallbackCalled = true;
+                var storeRegistry = new Registry<ISaveStore>();
+                var store = new FakeSaveStore(callback, new SaveState() { ChunkName = "global", Data = new { Test = 10 } });
+                storeRegistry.Register(store);
+
+                var depot = TestHelpers.GenerateFakeSaveData("Save1", store);
+
+                var manager = new DefaultSaveManager(storeRegistry, depot: depot);
+
+                Assert.False(wasCallbackCalled);
+
+                manager.MakeSnapshot();
+                manager.ApplySnapshot(new SaveContainer() { Name = "Save1" });
+
+                Assert.True(wasCallbackCalled);
+            }
         }
 
         public class MakeSnapshot : DefaultSaveManagerTests {
