@@ -1,5 +1,21 @@
 # Changelog
 
+<a name="0.2.0"></a>
+## 0.2.0 (2021-08-27)
+
+### Added
+
+- ✨ SaveStores can be notified when all chunks are loaded [[0ebc45e](https://github.com/troublecatstudios/Chonks.net/commit/0ebc45e2715c9f16672263e1e512596f1dba3782)]
+- 📈 ChunkDataSegment no longer re-serializes during ToJson() [[9f49ab3](https://github.com/troublecatstudios/Chonks.net/commit/9f49ab326a03d6efeda2f85b865b13f86e698cc2)]
+
+### Miscellaneous
+
+- 📄 adding docs on how to create a new release [[c517b0d](https://github.com/troublecatstudios/Chonks.net/commit/c517b0d806cbd37aa7e1f3e170ff0d4d372b3d0e)]
+- 🧹 adds some of the housekeeping files to the solution [[296e924](https://github.com/troublecatstudios/Chonks.net/commit/296e92463c04a1c2693a065b83ca26d541206bd4)]
+- 🧹 adds docs to solution [[d24afab](https://github.com/troublecatstudios/Chonks.net/commit/d24afabe541f888a831a5ba8025c3db5dd1d47c3)]
+- 📄 doc comment updates [[bbc56a6](https://github.com/troublecatstudios/Chonks.net/commit/bbc56a67499be962948e5012d33e2635e52ae5d9)]
+
+
 <a name="0.1.0"></a>
 ## 0.1.0 (2021-08-24)
 
