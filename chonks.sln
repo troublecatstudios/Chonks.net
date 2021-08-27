@@ -5,11 +5,18 @@ VisualStudioVersion = 16.0.30114.105
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{7F49508D-1BA1-4385-A299-2540A276BBF3}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Chonks", "src\Chonks\Chonks.csproj", "{C8C66196-BA3E-4481-A803-642F9EB3C5A1}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Chonks", "src\Chonks\Chonks.csproj", "{C8C66196-BA3E-4481-A803-642F9EB3C5A1}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tests", "tests", "{412B8882-101C-4C54-8D4B-A1D44FCD4DB0}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Chonks.Tests", "tests\Chonks.Tests\Chonks.Tests.csproj", "{54BC5439-C81A-4A6A-9D72-EEF292195AA3}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Chonks.Tests", "tests\Chonks.Tests\Chonks.Tests.csproj", "{54BC5439-C81A-4A6A-9D72-EEF292195AA3}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "docs", "docs", "{C729EB42-866C-4DA7-85EC-36A57EA7A4C9}"
+	ProjectSection(SolutionItems) = preProject
+		CHANGELOG.md = CHANGELOG.md
+		LICENSE = LICENSE
+		README.md = README.md
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -19,9 +26,6 @@ Global
 		Release|Any CPU = Release|Any CPU
 		Release|x64 = Release|x64
 		Release|x86 = Release|x86
-	EndGlobalSection
-	GlobalSection(SolutionProperties) = preSolution
-		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
 		{C8C66196-BA3E-4481-A803-642F9EB3C5A1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
@@ -49,8 +53,14 @@ Global
 		{54BC5439-C81A-4A6A-9D72-EEF292195AA3}.Release|x86.ActiveCfg = Release|Any CPU
 		{54BC5439-C81A-4A6A-9D72-EEF292195AA3}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
 		{C8C66196-BA3E-4481-A803-642F9EB3C5A1} = {7F49508D-1BA1-4385-A299-2540A276BBF3}
 		{54BC5439-C81A-4A6A-9D72-EEF292195AA3} = {412B8882-101C-4C54-8D4B-A1D44FCD4DB0}
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {B185B5EB-9959-4E97-BAE5-BFB9414BBA92}
 	EndGlobalSection
 EndGlobal
