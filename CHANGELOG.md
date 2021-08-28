@@ -1,5 +1,13 @@
 # Changelog
 
+<a name="0.3.0"></a>
+## 0.3.0 (2021-08-28)
+
+### Fixed
+
+- 🐛 Registry&lt;T&gt; now prunes null items before returning its list [[de52c76](https://github.com/troublecatstudios/Chonks.net/commit/de52c760089537652b34846f4a174d471d7d2145)]
+
+
 <a name="0.2.0"></a>
 ## 0.2.0 (2021-08-27)
 
