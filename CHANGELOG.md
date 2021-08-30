@@ -1,5 +1,14 @@
 # Changelog
 
+<a name="0.4.0"></a>
+## 0.4.0 (2021-08-30)
+
+### Added
+
+- ✨ save files can be deleted [[ca5f5b9](https://github.com/troublecatstudios/Chonks.net/commit/ca5f5b9ee1545500ca1113e997eb5184797eb68d)]
+- ✨ chunk data can be overwritten now [[1d4df58](https://github.com/troublecatstudios/Chonks.net/commit/1d4df5818cd5c372f32021fb732b0e4d8ca6b6da)]
+
+
 <a name="0.3.0"></a>
 ## 0.3.0 (2021-08-28)
 
