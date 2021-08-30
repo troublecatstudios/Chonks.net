@@ -25,5 +25,13 @@ namespace Chonks {
         /// <param name="ex">The ex.</param>
         /// <returns></returns>
         bool TryWriteSave(string name, SaveChunk[] chunks, out Exception ex);
+
+        /// <summary>
+        /// Tries to the clear save.
+        /// </summary>
+        /// <param name="name">The name.</param>
+        /// <param name="ex">The ex.</param>
+        /// <returns></returns>
+        bool TryClearSave(string name, out Exception ex);
     }
 }

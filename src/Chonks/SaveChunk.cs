@@ -47,8 +47,12 @@ namespace Chonks {
         /// </summary>
         /// <param name="key">The key.</param>
         /// <param name="data">The data.</param>
-        public void AddToChunk(string key, object data) {
+        public void AddToChunk(string key, object data, bool overwrite = false) {
             var json = SerializationUtility.SerializeObject(data);
+            if (Data.ContainsKey(key) && overwrite) {
+                Data[key] = json;
+                return;
+            }
             Data.Add(key, json);
         }
     }
