@@ -18,6 +18,13 @@ namespace Chonks.Tests.Fakes {
             return false;
         }
 
+        public bool TryClearSave(string name, out Exception ex) {
+            ex = null;
+            if (!_storage.ContainsKey(name)) return true;
+            Storage.Remove(name);
+            return true;
+        }
+
         public bool TryWriteSave(string name, SaveChunk[] chunks, out Exception ex) {
             ex = null;
             if (_storage.TryAdd(name, chunks)) {

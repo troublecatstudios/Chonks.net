@@ -17,6 +17,15 @@ namespace Chonks.Depots {
             return false;
         }
 
+        public bool TryClearSave(string name, out Exception ex) {
+            ex = null;
+            if (!_chunks.ContainsKey(name)) {
+                return true;
+            }
+            _chunks.Remove(name);
+            return true;
+        }
+
         public bool TryWriteSave(string name, SaveChunk[] chunks, out Exception ex) {
             ex = null;
             if (!_chunks.ContainsKey(name)) {

@@ -46,6 +46,22 @@ namespace Chonks.Depots {
             return _emptySaves;
         }
 
+        public bool TryClearSave(string name, out Exception ex) {
+            EnsureWorkingDirectory();
+            ex = null;
+            try {
+                var path = Path.Combine(_workingDirectoryPath, $"{name}.sav");
+                if (File.Exists(path)) {
+                    File.Delete(path);
+                    return true;
+                }
+                return true;
+            } catch (Exception e) {
+                ex = e;
+                return false;
+            }
+        }
+
         public bool TryLoadSave(string name, out SaveChunk[] chunks, out Exception ex) {
             EnsureWorkingDirectory();
             ex = null;
@@ -104,8 +120,14 @@ namespace Chonks.Depots {
         public bool TryWriteSave(string name, SaveChunk[] chunks, out Exception ex) {
             EnsureWorkingDirectory();
             ex = null;
+            bool wasTempSave = false;
             try {
-                using (var fs = new FileStream(Path.Combine(_workingDirectoryPath, $"{name}.sav"), FileMode.OpenOrCreate, FileAccess.Write)) {
+                var saveFilePath = Path.Combine(_workingDirectoryPath, $"{name}.sav");
+                if (File.Exists(saveFilePath)) {
+                    saveFilePath = Path.Combine(_workingDirectoryPath, $"{name}_tmp.sav");
+                    wasTempSave = true;
+                }
+                using (var fs = new FileStream(saveFilePath, FileMode.OpenOrCreate, FileAccess.Write)) {
                     using (var writer = new StreamWriter(fs)) {
                         foreach (var chunk in chunks) {
                             writer.WriteLine(CHUNK_START_MARKER);
@@ -119,6 +141,13 @@ namespace Chonks.Depots {
                         }
                     }
                 }
+
+                if (wasTempSave) {
+                    var prevSave = Path.Combine(_workingDirectoryPath, $"{name}.sav");
+                    File.Delete(prevSave);
+                    File.Move(saveFilePath, prevSave);
+                }
+
                 return true;
             } catch (Exception e) {
                 ex = e;

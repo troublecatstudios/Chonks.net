@@ -6,8 +6,6 @@ using Xunit;
 
 namespace Chonks.Tests {
     public class FileSaveDepotTests {
-        private FileSaveDepot _depot;
-
         private string _temporaryWorkingDirectory;
 
         public FileSaveDepotTests() {
@@ -15,11 +13,30 @@ namespace Chonks.Tests {
             if (!Directory.Exists(_temporaryWorkingDirectory)) {
                 Directory.CreateDirectory(_temporaryWorkingDirectory);
             }
-            _depot = new FileSaveDepot(_temporaryWorkingDirectory);
         }
 
         ~FileSaveDepotTests() {
             Directory.Delete(_temporaryWorkingDirectory);
+        }
+
+        public class TryClearSae : FileSaveDepotTests {
+            [InlineData("SaveFile1")]
+            [InlineData("MultipleChunks")]
+            [Theory]
+            public void SavedFilesCanBeDeleted(string fixtureName) {
+                using (var fixtures = new TemporaryFixture("Fixtures")) {
+                    var depot = new FileSaveDepot(fixtures.Path);
+                    var saveFilePath = fixtures.GetFilePath(fixtureName + ".sav");
+                    Assert.True(File.Exists(saveFilePath));
+
+                    var result = depot.TryClearSave(fixtureName, out var ex);
+
+                    Assert.Null(ex);
+                    Assert.True(result);
+
+                    Assert.False(File.Exists(saveFilePath));
+                }
+            }
         }
 
         public class TryLoadSave : FileSaveDepotTests {
@@ -33,9 +50,9 @@ namespace Chonks.Tests {
 
                     var expectedChunks = JsonConvert.DeserializeObject<SaveChunk[]>(json);
 
-                    File.WriteAllText(Path.Combine(_temporaryWorkingDirectory, fixtureName + ".sav"), savFileData);
+                    var depot = new FileSaveDepot(fixtures.Path);
 
-                    var result = _depot.TryLoadSave(fixtureName, out var chunks, out var ex);
+                    var result = depot.TryLoadSave(fixtureName, out var chunks, out var ex);
 
                     Assert.True(result);
                     Assert.Null(ex);
@@ -70,11 +87,13 @@ namespace Chonks.Tests {
 
                     var chunks = JsonConvert.DeserializeObject<SaveChunk[]>(json);
 
-                    var result = _depot.TryWriteSave(fixtureName, chunks, out var ex);
+                    var depot = new FileSaveDepot(fixtures.Path);
+
+                    var result = depot.TryWriteSave(fixtureName, chunks, out var ex);
                     Assert.True(result);
                     Assert.Null(ex);
 
-                    var savFile = File.ReadAllText(Path.Combine(_temporaryWorkingDirectory, fixtureName + ".sav"));
+                    var savFile = File.ReadAllText(fixtures.GetFilePath(fixtureName + ".sav"));
                     Assert.Equal(expectedSavFile, savFile);
                 }
             }
@@ -84,7 +103,8 @@ namespace Chonks.Tests {
 
             [Fact]
             public void GivenNoSavesExist_ReturnsAnEmptyListOfSaves() {
-                var saves = _depot.ListSaves();
+                var depot = new FileSaveDepot(_temporaryWorkingDirectory);
+                var saves = depot.ListSaves();
 
                 Assert.Empty(saves);
             }
@@ -96,12 +116,14 @@ namespace Chonks.Tests {
                 }
                 Assert.False(Directory.Exists(_temporaryWorkingDirectory));
 
-                var saves = _depot.ListSaves();
+                var depot = new FileSaveDepot(_temporaryWorkingDirectory);
+
+                var saves = depot.ListSaves();
 
                 Assert.Empty(saves);
                 Assert.True(Directory.Exists(_temporaryWorkingDirectory));
 
-                _depot.Cleanup();
+                depot.Cleanup();
             }
 
             [Fact]
@@ -109,7 +131,9 @@ namespace Chonks.Tests {
                 Directory.CreateDirectory(_temporaryWorkingDirectory);
                 File.WriteAllText(Path.Combine(_temporaryWorkingDirectory, "save1"), "test");
 
-                var saves = _depot.ListSaves();
+                var depot = new FileSaveDepot(_temporaryWorkingDirectory);
+
+                var saves = depot.ListSaves();
 
                 Assert.Single(saves);
             }
